@@ -1,0 +1,261 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/base}"
+>
+  <head>
+    <title>Students</title>
+  </head>
+  <body>
+    <h1 layout:fragment="pageTitle">Students</h1>
+    <div layout:fragment="content">
+      <div class="flex items-center justify-between mb-6">
+        <!-- Left: stats bar -->
+        <div
+          class="bg-white border border-slate-200 rounded-xl px-5 py-3 flex items-center gap-3 shadow-sm"
+        >
+          <span
+            class="text-2xl font-display text-slate-800"
+            th:text="${totalCount}"
+            >0</span
+          >
+          <span class="text-sm text-slate-500">/ 200 students enrolled</span>
+          <div class="w-32 bg-slate-100 rounded-full h-2 ml-2">
+            <div
+              class="bg-indigo-500 h-2 rounded-full"
+              th:style="'width: ' + ${(totalCount / 200.0) * 100} + '%'"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Right: all action buttons -->
+        <div class="flex gap-2 items-center">
+          <form th:action="@{/students/assign-all-dorms}" method="post">
+            <button
+              class="bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium px-4 py-2 rounded-lg"
+            >
+              ⚡ Assign All to Dorms
+            </button>
+          </form>
+          <a
+            th:href="@{/generate-students}"
+            class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          >
+            ⚡ Generate
+          </a>
+          <a
+            th:href="@{/students/add}"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+          >
+            + Add Student
+          </a>
+        </div>
+      </div>
+      <!-- Filter bar -->
+      <form
+        th:action="@{/students}"
+        method="get"
+        class="bg-white border border-slate-200 rounded-xl px-5 py-4 shadow-sm mb-4 flex flex-wrap items-end gap-4"
+      >
+        <!-- Gender filter -->
+        <div>
+          <label class="block text-xs font-medium text-slate-500 mb-1"
+            >Gender</label
+          >
+          <select
+            name="gender"
+            class="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="">All Genders</option>
+            <option
+              th:each="g : ${genders}"
+              th:value="${g}"
+              th:text="${g == T(com.Sarthak.course_recommender.model.enums.Gender).MALE ? 'Male' : 'Female'}"
+              th:selected="${selectedGender == g.name()}"
+            ></option>
+          </select>
+        </div>
+
+        <!-- Section filter -->
+        <div>
+          <label class="block text-xs font-medium text-slate-500 mb-1"
+            >Section</label
+          >
+          <select
+            name="section"
+            class="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="">All Sections</option>
+            <option
+              th:each="s : ${sections}"
+              th:value="${s}"
+              th:text="'Section ' + ${s}"
+              th:selected="${selectedSection == s.name()}"
+            ></option>
+          </select>
+        </div>
+
+        <!-- Stream filter -->
+        <div>
+          <label class="block text-xs font-medium text-slate-500 mb-1"
+            >Stream</label
+          >
+          <select
+            name="stream"
+            class="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="">All Streams</option>
+            <option
+              th:value="COMPUTER_PHYSICS"
+              th:selected="${selectedStream == 'COMPUTER_PHYSICS'}"
+            >
+              Computer & Physics
+            </option>
+            <option
+              th:value="ACCOUNTS_ECONOMICS"
+              th:selected="${selectedStream == 'ACCOUNTS_ECONOMICS'}"
+            >
+              Accounts & Economics
+            </option>
+          </select>
+        </div>
+
+        <!-- Buttons -->
+        <!-- Buttons + Search -->
+        <div class="flex gap-2">
+          <button
+            type="submit"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-1.5 rounded-lg transition-colors"
+          >
+            Filter
+          </button>
+          <a
+            th:href="@{/students}"
+            class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-medium px-4 py-1.5 rounded-lg transition-colors"
+          >
+            Clear
+          </a>
+
+          <!-- Name search -->
+          <div
+            class="flex items-center border border-slate-200 rounded-lg overflow-hidden"
+          >
+            <input
+              type="text"
+              name="name"
+              th:value="${selectedName}"
+              placeholder="Search by name..."
+              class="px-3 py-1.5 text-sm focus:outline-none w-44"
+            />
+            <button
+              type="submit"
+              class="bg-slate-100 hover:bg-slate-200 px-3 py-1.5 text-slate-500 text-sm border-l border-slate-200"
+            >
+              🔍
+            </button>
+          </div>
+        </div>
+
+        <!-- Active filter count -->
+        
+        <div
+          th:if="${selectedGender != null or selectedSection != null or selectedStream != null or selectedName != null}"
+          class="ml-auto text-xs text-indigo-600 font-medium self-center"
+        >
+          Showing filtered results —
+          <span th:text="${#lists.size(students)}"></span> student(s)
+        </div>
+      </form>
+
+      <div
+        class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden"
+      >
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 border-b border-slate-200">
+            <tr>
+              <th class="text-left px-5 py-3 text-slate-500 font-medium">
+                Name
+              </th>
+              <th class="text-left px-5 py-3 text-slate-500 font-medium">
+                Gender
+              </th>
+              <th class="text-left px-5 py-3 text-slate-500 font-medium">
+                Section
+              </th>
+              <th class="text-left px-5 py-3 text-slate-500 font-medium">
+                Stream
+              </th>
+              <th class="text-left px-5 py-3 text-slate-500 font-medium">
+                Dorm
+              </th>
+              <th class="text-left px-5 py-3 text-slate-500 font-medium">
+                Class
+              </th>
+              <th class="px-5 py-3"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr
+              th:each="student : ${students}"
+              class="hover:bg-slate-50 transition-colors"
+            >
+              <td
+                class="px-5 py-3 font-medium text-slate-800"
+                th:text="${student.name}"
+              ></td>
+              <td class="px-5 py-3">
+                <span
+                  th:if="${student.gender.name() == 'MALE'}"
+                  class="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-0.5 rounded-full"
+                  >Male</span
+                >
+                <span
+                  th:if="${student.gender.name() == 'FEMALE'}"
+                  class="bg-pink-100 text-pink-700 text-xs font-medium px-2 py-0.5 rounded-full"
+                  >Female</span
+                >
+              </td>
+              <td
+                class="px-5 py-3 text-slate-600"
+                th:text="${student.section}"
+              ></td>
+              <td class="px-5 py-3">
+                <span
+                  th:if="${student.subjectGroup.name() == 'COMPUTER_PHYSICS'}"
+                  class="bg-indigo-100 text-indigo-700 text-xs font-medium px-2 py-0.5 rounded-full"
+                  >Computer & Physics</span
+                >
+                <span
+                  th:if="${student.subjectGroup.name() == 'ACCOUNTS_ECONOMICS'}"
+                  class="bg-amber-100 text-amber-700 text-xs font-medium px-2 py-0.5 rounded-full"
+                  >Accounts & Economics</span
+                >
+              </td>
+              <td
+                class="px-5 py-3 text-slate-500"
+                th:text="${student.dorm != null ? student.dorm.name : '—'}"
+              ></td>
+              <td
+                class="px-5 py-3 text-slate-500"
+                th:text="${student.classGroup != null ? student.classGroup.groupName : '—'}"
+              ></td>
+              <td class="px-5 py-3">
+                <a
+                  th:href="@{/students/{id}(id=${student.id})}"
+                  class="text-indigo-600 hover:text-indigo-800 font-medium text-xs"
+                  >View →</a
+                >
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(students)}">
+              <td colspan="7" class="px-5 py-10 text-center text-slate-400">
+                No students enrolled yet.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head><title>Student Attendance</title></head>
+<body>
+<h1 layout:fragment="pageTitle">Student Attendance</h1>
+<div layout:fragment="content">
+
+    <div class="max-w-xl">
+        <div class="mb-4">
+            <a th:href="@{/students/{id}(id=${studentId})}"
+               class="text-sm text-indigo-600 hover:text-indigo-800">← Back to Student</a>
+        </div>
+
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <table class="w-full text-sm">
+                <thead class="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                        <th class="text-left px-5 py-3 text-slate-500 font-medium">Date</th>
+                        <th class="text-left px-5 py-3 text-slate-500 font-medium">Class Group</th>
+                        <th class="text-left px-5 py-3 text-slate-500 font-medium">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    <tr th:each="a : ${attendanceList}" class="hover:bg-slate-50">
+                        <td class="px-5 py-3 text-slate-600"
+                            th:text="${#temporals.format(a.date, 'dd MMM yyyy')}"></td>
+                        <td class="px-5 py-3 text-slate-600"
+                            th:text="${a.classGroup.groupName}"></td>
+                        <td class="px-5 py-3">
+                            <span th:if="${a.status.name() == 'PRESENT'}"
+                                  class="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                                Present
+                            </span>
+                            <span th:if="${a.status.name() == 'ABSENT'}"
+                                  class="bg-red-100 text-red-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                                Absent
+                            </span>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(attendanceList)}">
+                        <td colspan="3" class="px-5 py-10 text-center text-slate-400">
+                            No attendance records yet.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

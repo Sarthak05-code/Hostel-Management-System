@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head><title>Supervisors</title></head>
+<body>
+<h1 layout:fragment="pageTitle">Supervisors</h1>
+<div layout:fragment="content">
+
+    <div class="flex justify-end mb-6">
+        <a th:href="@{/supervisors/add}"
+           class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+            + Add Supervisor
+        </a>
+    </div>
+
+    <div th:if="${!#lists.isEmpty(unassigned)}"
+         class="mb-4 bg-amber-50 border border-amber-200 text-amber-700 text-sm px-4 py-3 rounded-lg">
+        ⚠ <span th:text="${#lists.size(unassigned)}"></span> supervisor(s) are not assigned to any dorm.
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-slate-50 border-b border-slate-200">
+                <tr>
+                    <th class="text-left px-5 py-3 text-slate-500 font-medium">Name</th>
+                    <th class="text-left px-5 py-3 text-slate-500 font-medium">Gender</th>
+                    <th class="text-left px-5 py-3 text-slate-500 font-medium">Assigned Dorm</th>
+                    <th class="text-left px-5 py-3 text-slate-500 font-medium">Status</th>
+                    <th class="px-5 py-3"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                <tr th:each="supervisor : ${supervisors}" class="hover:bg-slate-50 transition-colors">
+                    <td class="px-5 py-3 font-medium text-slate-800" th:text="${supervisor.name}"></td>
+                    <td class="px-5 py-3">
+                        <span th:if="${supervisor.gender.name() == 'MALE'}"
+                              class="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-0.5 rounded-full">Male</span>
+                        <span th:if="${supervisor.gender.name() == 'FEMALE'}"
+                              class="bg-pink-100 text-pink-700 text-xs font-medium px-2 py-0.5 rounded-full">Female</span>
+                    </td>
+                    <td class="px-5 py-3 text-slate-600"
+                        th:text="${supervisor.dorm != null ? supervisor.dorm.name : '—'}"></td>
+                    <td class="px-5 py-3">
+                        <span th:if="${supervisor.dorm != null}"
+                              class="bg-green-100 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full">Assigned</span>
+                        <span th:if="${supervisor.dorm == null}"
+                              class="bg-slate-100 text-slate-500 text-xs font-medium px-2 py-0.5 rounded-full">Unassigned</span>
+                    </td>
+                    <td class="px-5 py-3">
+                        <div class="flex items-center gap-3">
+                            <a th:if="${supervisor.dorm == null}"
+                               th:href="@{/supervisors/{id}/assign-dorm(id=${supervisor.id})}"
+                               class="text-indigo-600 hover:text-indigo-800 text-xs font-medium">Assign →</a>
+                            <form th:if="${supervisor.dorm != null}"
+                                  th:action="@{/supervisors/{id}/remove-dorm(id=${supervisor.id})}" method="post">
+                                <button class="text-slate-400 hover:text-slate-600 text-xs">Unassign</button>
+                            </form>
+                            <form th:action="@{/supervisors/{id}/delete(id=${supervisor.id})}" method="post"
+                                  onsubmit="return confirm('Remove this supervisor?')">
+                                <button class="text-red-400 hover:text-red-600 text-xs">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(supervisors)}">
+                    <td colspan="5" class="px-5 py-10 text-center text-slate-400">No supervisors added yet.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head><title>Timetable</title></head>
+<body>
+<h1 layout:fragment="pageTitle">Timetable</h1>
+<div layout:fragment="content">
+
+    <div class="flex justify-end mb-6">
+        <form th:action="@{/timetable/generate}" method="post">
+            <button class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg"
+                    onclick="return confirm('Regenerate timetable for this session?')">
+                ⟳ Generate Timetable
+            </button>
+        </form>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4">
+        <div th:each="day : ${days}"
+             class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-slate-800 px-5 py-3">
+                <h3 class="font-display text-white text-sm" th:text="${day}"></h3>
+            </div>
+            <div class="divide-y divide-slate-100">
+                <div th:each="slot : ${hostelSlots}"
+                     th:if="${slot.dayOfWeek == day}"
+                     class="flex items-center justify-between px-5 py-3 text-sm">
+                    <span class="text-slate-500 w-40"
+                          th:text="${#temporals.format(slot.startTime, 'hh:mm a')} + ' – ' + ${#temporals.format(slot.endTime, 'hh:mm a')}"></span>
+                    <span th:switch="${slot.activityType.name()}">
+                        <span th:case="'DINNER'" class="bg-orange-100 text-orange-700 text-xs font-medium px-3 py-1 rounded-full">🍽 Dinner</span>
+                        <span th:case="'GAMES'" class="bg-green-100 text-green-700 text-xs font-medium px-3 py-1 rounded-full">🎮 Games</span>
+                        <span th:case="'MOVIE_NIGHT'" class="bg-purple-100 text-purple-700 text-xs font-medium px-3 py-1 rounded-full">🎬 Movie Night</span>
+                        <span th:case="'FREE_TIME'" class="bg-sky-100 text-sky-700 text-xs font-medium px-3 py-1 rounded-full">☕ Free Time</span>
+                        <span th:case="'SLEEP'" class="bg-slate-100 text-slate-600 text-xs font-medium px-3 py-1 rounded-full">🌙 Sleep</span>
+                        <span th:case="'CLASS'" class="bg-indigo-100 text-indigo-700 text-xs font-medium px-3 py-1 rounded-full">📖 Self Study</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div th:if="${#lists.isEmpty(hostelSlots)}"
+             class="text-center py-16 text-slate-400 text-sm">
+            No timetable generated yet. Click "Generate Timetable" to create one.
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

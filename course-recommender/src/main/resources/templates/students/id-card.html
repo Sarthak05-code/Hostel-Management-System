@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head><title>ID Card</title></head>
+<body>
+<h1 layout:fragment="pageTitle">Student ID Card</h1>
+<div layout:fragment="content">
+
+    <div class="mb-4 flex items-center justify-between max-w-sm">
+        <a th:href="@{/students/{id}(id=${student.id})}"
+           class="text-sm text-indigo-600 hover:text-indigo-800">← Back to Student</a>
+        <button onclick="window.print()"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg">
+            🖨 Print
+        </button>
+    </div>
+
+    <!-- ID Card -->
+    <div id="id-card"
+         class="max-w-sm bg-white rounded-2xl border-2 border-indigo-200 shadow-lg overflow-hidden">
+
+        <!-- Header -->
+        <div class="bg-indigo-600 px-6 py-4">
+            <p class="font-display text-white text-lg leading-tight">Hostel</p>
+            <p class="font-display text-indigo-200 text-lg leading-tight">Management System</p>
+            <p class="text-indigo-300 text-xs mt-1">Student Identity Card</p>
+        </div>
+
+        <!-- Body -->
+        <div class="px-6 py-5">
+
+            <!-- Avatar placeholder -->
+            <div class="w-16 h-16 rounded-full flex items-center justify-center text-2xl mb-4"
+                 th:classappend="${student.gender.name() == 'MALE'} ? 'bg-blue-100' : 'bg-pink-100'">
+                <span th:if="${student.gender.name() == 'MALE'}">👨</span>
+                <span th:if="${student.gender.name() == 'FEMALE'}">👩</span>
+            </div>
+
+            <!-- Name -->
+            <h2 class="font-display text-xl text-slate-800 mb-1"
+                th:text="${student.name}"></h2>
+            <p class="text-xs text-slate-400 mb-4">
+                ID: #<span th:text="${student.id}"></span>
+            </p>
+
+            <!-- Details grid -->
+            <div class="grid grid-cols-2 gap-3 text-sm">
+                <div class="bg-slate-50 rounded-lg p-3">
+                    <p class="text-xs text-slate-400 mb-0.5">Section</p>
+                    <p class="font-medium text-slate-800"
+                       th:text="${student.section}"></p>
+                </div>
+                <div class="bg-slate-50 rounded-lg p-3">
+                    <p class="text-xs text-slate-400 mb-0.5">Gender</p>
+                    <p class="font-medium text-slate-800"
+                       th:text="${student.gender.name() == 'MALE' ? 'Male' : 'Female'}"></p>
+                </div>
+                <div class="bg-slate-50 rounded-lg p-3">
+                    <p class="text-xs text-slate-400 mb-0.5">Stream</p>
+                    <p class="font-medium text-xs"
+                       th:classappend="${student.subjectGroup.name() == 'COMPUTER_PHYSICS'} ? 'text-indigo-600' : 'text-amber-600'"
+                       th:text="${student.subjectGroup.name() == 'COMPUTER_PHYSICS' ? 'Computer & Physics' : 'Accounts & Economics'}">
+                    </p>
+                </div>
+                <div class="bg-slate-50 rounded-lg p-3">
+                    <p class="text-xs text-slate-400 mb-0.5">Class Group</p>
+                    <p class="font-medium text-slate-800"
+                       th:text="${student.classGroup != null ? student.classGroup.groupName : 'Not assigned'}">
+                    </p>
+                </div>
+                <div class="bg-slate-50 rounded-lg p-3 col-span-2">
+                    <p class="text-xs text-slate-400 mb-0.5">Dorm</p>
+                    <p class="font-medium text-slate-800"
+                       th:text="${student.dorm != null ? student.dorm.name : 'Not assigned'}">
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-slate-50 border-t border-slate-100 px-6 py-3 flex items-center justify-between">
+            <p class="text-xs text-slate-400">Valid for current session</p>
+            <span th:if="${student.gender.name() == 'MALE'}"
+                  class="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-0.5 rounded-full">Male</span>
+            <span th:if="${student.gender.name() == 'FEMALE'}"
+                  class="bg-pink-100 text-pink-700 text-xs font-medium px-2 py-0.5 rounded-full">Female</span>
+        </div>
+    </div>
+
+    <!-- Print styles -->
+    <style>
+        @media print {
+            body * { visibility: hidden; }
+            #id-card, #id-card * { visibility: visible; }
+            #id-card {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+            }
+        }
+    </style>
+
+</div>
+</body>
+</html>

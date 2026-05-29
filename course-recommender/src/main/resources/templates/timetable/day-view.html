@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head><title>Daily Schedule</title></head>
+<body>
+<h1 layout:fragment="pageTitle">Daily Schedule</h1>
+<div layout:fragment="content">
+
+    <div class="mb-4 flex items-center justify-between">
+        <a th:href="@{/timetable}" class="text-sm text-indigo-600 hover:text-indigo-800">← Full Timetable</a>
+        <div class="flex gap-2">
+            <a th:each="d : ${T(java.time.DayOfWeek).values()}"
+               th:href="@{/timetable/day/{d}(d=${d})}"
+               th:text="${d.toString().substring(0,3)}"
+               th:classappend="${d == day} ? ' bg-indigo-600 text-white border-indigo-600' : ' bg-white text-slate-600 border-slate-200 hover:border-indigo-400'"
+               class="text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors">
+            </a>
+        </div>
+    </div>
+
+    <div class="max-w-xl">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-slate-800 px-5 py-4">
+                <h3 class="font-display text-white text-lg" th:text="${day}"></h3>
+                <p class="text-slate-400 text-xs mt-0.5">All hostel activities for the day</p>
+            </div>
+            <div class="divide-y divide-slate-100">
+                <div th:each="slot : ${slots}" class="flex items-center gap-4 px-5 py-4">
+                    <div class="w-36 shrink-0">
+                        <p class="text-xs font-medium text-slate-700"
+                           th:text="${#temporals.format(slot.startTime, 'hh:mm a')}"></p>
+                        <p class="text-xs text-slate-400"
+                           th:text="'ends ' + ${#temporals.format(slot.endTime, 'hh:mm a')}"></p>
+                    </div>
+                    <span th:switch="${slot.activityType.name()}">
+                        <span th:case="'DINNER'" class="bg-orange-100 text-orange-700 text-xs font-medium px-3 py-1.5 rounded-full">🍽 Dinner</span>
+                        <span th:case="'GAMES'" class="bg-green-100 text-green-700 text-xs font-medium px-3 py-1.5 rounded-full">🎮 Games</span>
+                        <span th:case="'MOVIE_NIGHT'" class="bg-purple-100 text-purple-700 text-xs font-medium px-3 py-1.5 rounded-full">🎬 Movie Night</span>
+                        <span th:case="'FREE_TIME'" class="bg-sky-100 text-sky-700 text-xs font-medium px-3 py-1.5 rounded-full">☕ Free Time</span>
+                        <span th:case="'SLEEP'" class="bg-slate-100 text-slate-600 text-xs font-medium px-3 py-1.5 rounded-full">🌙 Sleep</span>
+                        <span th:case="'CLASS'" class="bg-indigo-100 text-indigo-700 text-xs font-medium px-3 py-1.5 rounded-full">📖 Self Study</span>
+                    </span>
+                </div>
+                <div th:if="${#lists.isEmpty(slots)}"
+                     class="px-5 py-10 text-center text-slate-400 text-sm">
+                    No schedule generated yet.
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

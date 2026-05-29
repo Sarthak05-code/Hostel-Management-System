@@ -1,0 +1,97 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/base}"
+>
+  <head>
+    <title>Notice Board</title>
+  </head>
+  <body>
+    <h1 layout:fragment="pageTitle">Notice Board</h1>
+    <div layout:fragment="content">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Post new notice -->
+        <div class="lg:col-span-1">
+          <div
+            class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 sticky top-24"
+          >
+            <h2 class="font-display text-lg text-slate-800 mb-4">
+              Post a Notice
+            </h2>
+            <form th:action="@{/notices/add}" method="post" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1"
+                  >Title</label
+                >
+                <input
+                  type="text"
+                  name="title"
+                  required
+                  placeholder="e.g. Dinner delayed tonight"
+                  class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1"
+                  >Message</label
+                >
+                <textarea
+                  name="message"
+                  required
+                  rows="4"
+                  placeholder="Write the full notice here..."
+                  class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+                ></textarea>
+              </div>
+              <button
+                type="submit"
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-5 py-2 rounded-lg transition-colors"
+              >
+                Post Notice
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Notices list -->
+        <div class="lg:col-span-2 space-y-4">
+          <div
+            th:each="n : ${notices}"
+            class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"
+          >
+            <div class="flex items-start justify-between mb-2">
+              <h3
+                class="font-display text-lg text-slate-800"
+                th:text="${n.title}"
+              ></h3>
+              <form
+                th:action="@{/notices/{id}/delete(id=${n.id})}"
+                method="post"
+                onsubmit="return confirm('Delete this notice?');"
+              >
+                <button
+                  class="text-red-400 hover:text-red-600 text-xs font-medium"
+                >
+                  Delete
+                </button>
+              </form>
+            </div>
+            <p class="text-sm text-slate-600 mb-3" th:text="${n.message}"></p>
+            <p
+              class="text-xs text-slate-400"
+              th:text="${#temporals.format(n.postedAt, 'dd MMM yyyy, hh:mm a')}"
+            ></p>
+          </div>
+
+          <div
+            th:if="${#lists.isEmpty(notices)}"
+            class="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center"
+          >
+            <p class="text-slate-400 text-sm">No notices posted yet.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

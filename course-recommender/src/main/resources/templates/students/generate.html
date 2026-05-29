@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head><title>Generate Students</title></head>
+<body>
+<h1 layout:fragment="pageTitle">Generate Students</h1>
+<div layout:fragment="content">
+
+    <div class="max-w-md">
+        <div th:if="${error}"
+             class="mb-4 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
+            ✕ <span th:text="${error}"></span>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <h2 class="font-display text-xl text-slate-800 mb-1">Random Student Generator</h2>
+            <p class="text-sm text-slate-400 mb-6">
+                Generates N students with random names, genders, and sections,
+                and auto-assigns them to available dorms.
+            </p>
+            <form th:action="@{/generate-students}" method="post" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Number of Students</label>
+                    <input type="number" name="count" min="1" max="200" placeholder="e.g. 140"
+                           class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"/>
+                    <p class="text-xs text-slate-400 mt-1">Max 200 total in hostel.</p>
+                </div>
+                <button type="submit"
+                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
+                    Generate Students
+                </button>
+            </form>
+        </div>
+        <div class="mt-4 bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-500 space-y-1">
+            <p>✓ Gender split is 50/50 (half male, half female)</p>
+            <p>✓ Sections are assigned randomly across A–E</p>
+            <p>✓ Students are auto-assigned to dorms if space is available</p>
+            <p>✓ If hostel is near capacity, count is clamped automatically</p>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

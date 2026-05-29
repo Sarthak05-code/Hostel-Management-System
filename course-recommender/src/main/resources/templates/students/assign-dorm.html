@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head><title>Assign Dorm</title></head>
+<body>
+<h1 layout:fragment="pageTitle">Assign Dorm</h1>
+<div layout:fragment="content">
+
+    <div class="max-w-lg">
+        <p class="text-sm text-slate-500 mb-4">
+            Assigning dorm for
+            <span class="font-medium text-slate-800" th:text="${student.name}"></span>
+        </p>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <form th:action="@{/students/{id}/assign-dorm(id=${student.id})}"
+                  method="post" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">
+                        Available Dorms
+                    </label>
+                    <div class="space-y-2">
+                        <label th:each="dorm : ${availableDorms}"
+                               class="flex items-center justify-between border border-slate-200 rounded-lg px-4 py-3 cursor-pointer hover:border-indigo-400 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <input type="radio" name="dormId"
+                                       th:value="${dorm.id}" required/>
+                                <span class="text-sm font-medium text-slate-800"
+                                      th:text="${dorm.name}"></span>
+                            </div>
+                            <span class="text-xs text-slate-400"
+                                  th:text="${dorm.occupancyCount} + ' / 25'"></span>
+                        </label>
+                        <p th:if="${#lists.isEmpty(availableDorms)}"
+                           class="text-sm text-slate-400 text-center py-4">
+                            No available dorms for this gender.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="submit"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-5 py-2 rounded-lg">
+                        Assign
+                    </button>
+                    <a th:href="@{/students/{id}(id=${student.id})}"
+                       class="text-sm text-slate-500 px-5 py-2">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!doctype html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout/base}"
+>
+  <head>
+    <title>Dashboard</title>
+  </head>
+  <body>
+    <h1 layout:fragment="pageTitle">Dashboard</h1>
+
+    <div layout:fragment="content">
+      <!-- Latest notice — top of dashboard -->
+      <div
+        th:if="${latestNotice != null}"
+        class="mb-6 bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex items-start justify-between"
+      >
+        <div>
+          <p class="text-xs text-indigo-400 font-medium mb-1">
+            📌 Latest Notice
+          </p>
+          <p
+            class="text-sm font-medium text-indigo-800"
+            th:text="${latestNotice.title}"
+          ></p>
+          <p
+            class="text-xs text-indigo-600 mt-0.5"
+            th:text="${latestNotice.message}"
+          ></p>
+        </div>
+        <a
+          th:href="@{/notices}"
+          class="text-xs text-indigo-500 hover:text-indigo-700 font-medium shrink-0 ml-4"
+        >
+          View all →
+        </a>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <p class="text-xs text-slate-400 mb-1">Total Students</p>
+          <p
+            class="font-display text-3xl text-slate-800"
+            th:text="${totalStudents}"
+          >
+            0
+          </p>
+          <p class="text-xs text-slate-400 mt-1">of 200 max</p>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <p class="text-xs text-slate-400 mb-1">Total Dorms</p>
+          <p
+            class="font-display text-3xl text-slate-800"
+            th:text="${totalDorms}"
+          >
+            0
+          </p>
+          <p class="text-xs text-slate-400 mt-1">across both genders</p>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <p class="text-xs text-slate-400 mb-1">Class Groups</p>
+          <p
+            class="font-display text-3xl text-slate-800"
+            th:text="${totalClasses}"
+          >
+            0
+          </p>
+          <p class="text-xs text-slate-400 mt-1">active this session</p>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <p class="text-xs text-slate-400 mb-1">Supervisors</p>
+          <p
+            class="font-display text-3xl text-slate-800"
+            th:text="${totalSupervisors}"
+          >
+            0
+          </p>
+          <p
+            class="text-xs text-slate-400 mt-1"
+            th:text="${unassignedSupervisors} + ' unassigned'"
+          ></p>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <h2 class="font-display text-lg text-slate-700 mb-3">Quick Actions</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div
+          class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-center justify-between"
+        >
+          <div>
+            <p class="font-medium text-slate-800 text-sm">
+              Generate Class Groups
+            </p>
+            <p class="text-xs text-slate-400 mt-0.5">
+              Balances students across streams
+            </p>
+          </div>
+          <form th:action="@{/classes/generate}" method="post">
+            <button
+              class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-4 py-2 rounded-lg"
+              onclick="return confirm('Regenerate all class groups?');"
+            >
+              Generate
+            </button>
+          </form>
+        </div>
+        <div
+          class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex items-center justify-between"
+        >
+          <div>
+            <p class="font-medium text-slate-800 text-sm">Generate Timetable</p>
+            <p class="text-xs text-slate-400 mt-0.5">
+              Randomizes the session schedule
+            </p>
+          </div>
+          <form th:action="@{/timetable/generate}" method="post">
+            <button
+              class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-4 py-2 rounded-lg"
+              onclick="return confirm('Regenerate timetable?');"
+            >
+              Generate
+            </button>
+          </form>
+        </div>
+      </div>
+      
+
+      <!-- Warnings -->
+      <div
+        th:if="${unassignedStudents > 0}"
+        class="mb-3 bg-amber-50 border border-amber-200 text-amber-700 text-sm px-4 py-3 rounded-lg flex items-center justify-between"
+      >
+        <span
+          >⚠ <span th:text="${unassignedStudents}"></span> student(s) have no
+          dorm assigned.</span
+        >
+        <a
+          th:href="@{/students}"
+          class="text-amber-800 font-medium text-xs hover:underline"
+          >View →</a
+        >
+      </div>
+      <div
+        th:if="${overCapacityDorms > 0}"
+        class="mb-3 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg flex items-center justify-between"
+      >
+        <span
+          >⚠ <span th:text="${overCapacityDorms}"></span> dorm(s) are over
+          capacity.</span
+        >
+        <a
+          th:href="@{/dorms}"
+          class="text-red-800 font-medium text-xs hover:underline"
+          >View →</a
+        >
+      </div>
+    </div>
+  </body>
+</html>
