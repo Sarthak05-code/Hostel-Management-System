@@ -1,0 +1,2 @@
+This is my first real project as a Java learner. After spending 6 months learning Java, I felt confident enough to take on the challenge of building something with Spring Boot, along with some basic HTML and CSS. Tailwind CSS played a big role in making the UI look clean and polished. I also picked up some knowledge of DTOs and MySQL to bring the project together.
+The project may have occasional crashes since I haven't fully explored error handling yet — but that's all part of the learning process.
