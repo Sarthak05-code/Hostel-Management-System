@@ -4,8 +4,6 @@ package com.Sarthak.course_recommender.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-
 import com.Sarthak.course_recommender.model.ClassGroup;
 import com.Sarthak.course_recommender.model.Dorm;
 import com.Sarthak.course_recommender.model.Student;
@@ -14,7 +12,6 @@ import com.Sarthak.course_recommender.model.enums.Section;
 
 import java.util.List;
 
-@Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
 
     // Dorm
