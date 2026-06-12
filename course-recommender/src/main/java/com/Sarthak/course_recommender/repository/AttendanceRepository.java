@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+// Repository arent needed in any of this right now.
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
     List<Attendance> findByClassGroupAndDate(ClassGroup classGroup, LocalDate date);
