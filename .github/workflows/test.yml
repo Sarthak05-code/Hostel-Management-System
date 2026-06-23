@@ -12,6 +12,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    permissions:
+      checks: write
+      contents: read
+
     services:
       mysql:
         image: mysql:8.0
@@ -27,7 +31,7 @@ jobs:
           --health-retries=10
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up JDK 21
@@ -37,7 +41,7 @@ jobs:
           distribution: "temurin"
           cache: maven
 
-      - name: Build & Test
+      - name: Build and Test
         working-directory: ./course-recommender
         run: mvn -B clean package
         env:
@@ -50,6 +54,12 @@ jobs:
         with:
           name: app
           path: course-recommender/target/*.jar
+
+      - name: Publish Test Report
+        if: always()
+        uses: mikepenz/action-junit-report@v5
+        with:
+          report_paths: course-recommender/target/surefire-reports/*.xml
 
 
   deploy:
@@ -65,14 +75,16 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: app
-          path: .
+          path: ./artifacts
 
-      - name: List files (DEBUG STEP)
-        run: ls -R
+      - name: List files (debug step)
+        run: ls -R ./artifacts
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: Release v1.0.${{ github.run_number }}
-          files: "*.jar"
+          body: |
+            Automated build from commit ${{ github.sha }}
+          files: ./artifacts/*.jar
