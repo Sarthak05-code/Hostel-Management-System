@@ -33,7 +33,7 @@ A web application built with **Spring Boot**, **Thymeleaf**, and **MySQL** that 
 
 Before running this project, make sure you have:
 
-- Java 25 or higher
+- Java 21 or higher
 - Maven
 - MySQL Server
 - IntelliJ IDEA or VS Code or any IDEs you use
