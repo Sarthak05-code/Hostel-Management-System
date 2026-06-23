@@ -12,10 +12,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    permissions:
-      checks: write
-      contents: read
-
     services:
       mysql:
         image: mysql:8.0
@@ -31,7 +27,7 @@ jobs:
           --health-retries=10
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up JDK 21
@@ -41,28 +37,19 @@ jobs:
           distribution: "temurin"
           cache: maven
 
-      - name: Build and Test
+      - name: Build & Test
         working-directory: ./course-recommender
-        run: mvn -B clean verify
+        run: mvn -B clean package
         env:
           SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/Main
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: root
 
-      - name: Build JAR (copy to root)
-        run: cp course-recommender/target/*.jar course-recommender.jar
-
       - name: Upload JAR Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: course-recommender-jar
-          path: course-recommender.jar
-
-      - name: Publish Test Report
-        if: always()
-        uses: mikepenz/action-junit-report@v5
-        with:
-          report_paths: course-recommender/target/surefire-reports/*.xml
+          name: app
+          path: course-recommender/target/*.jar
 
 
   deploy:
@@ -77,196 +64,15 @@ jobs:
       - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
-          name: course-recommender-jar
-          path: ./artifacts
+          name: app
+          path: .
+
+      - name: List files (DEBUG STEP)
+        run: ls -R
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: Release v1.0.${{ github.run_number }}
-          body: |
-            Automated build from commit ${{ github.sha }}.
-            Spring Boot application is attached below.
-          files: ./artifacts/course-recommender.jar
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: "21"
-          distribution: "temurin"
-          cache: maven
-
-      - name: Build and Test
-        working-directory: ./course-recommender
-        run: mvn -B clean verify
-        env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/Main
-          SPRING_DATASOURCE_USERNAME: root
-          SPRING_DATASOURCE_PASSWORD: root
-
-      - name: Upload JAR Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: course-recommender-jar
-          path: course-recommender/target/*.jar
-
-      - name: Publish Test Report
-        if: always()
-        uses: mikepenz/action-junit-report@v5
-        with:
-          report_paths: "course-recommender/target/surefire-reports/*.xml"
-
-
-  deploy:
-    needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
-
-    steps:
-      - name: Download Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: course-recommender-jar
-          path: ./artifacts
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: Release v1.0.${{ github.run_number }}
-          body: |
-            Automated build from commit ${{ github.sha }}.
-            Spring Boot JAR is attached below.
-          files: ./artifacts/*.jar
-
-        uses: actions/setup-java@v4
-        with:
-          java-version: "25"
-          distribution: "temurin"
-          cache: maven
-
-      - name: Build and Test
-        working-directory: ./course-recommender
-        run: mvn -B clean verify
-        env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/Main
-          SPRING_DATASOURCE_USERNAME: root
-          SPRING_DATASOURCE_PASSWORD: root
-
-      - name: Upload JAR Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: course-recommender-jar
-          path: course-recommender/target/*.jar
-
-      - name: Publish Test Report
-        if: always()
-        uses: mikepenz/action-junit-report@v5
-        with:
-          report_paths: "course-recommender/target/surefire-reports/*.xml"
-
-  # ==========================================
-  # THE CD PHASE: Continuous Delivery to GitHub
-  # ==========================================
-  deploy:
-    needs: build # Won't run unless 'build' job succeeds
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write # Required to create a release and upload assets
-
-    steps:
-      - name: Download Built Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: course-recommender-jar
-          path: ./artifacts
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: Release v1.0.${{ github.run_number }}
-          body: |
-            Automated build from commit ${{ github.sha }}.
-            The compiled Spring Boot application is attached below.
-          draft: false
-          prerelease: false
-          files: ./artifacts/*.jar        uses: actions/setup-java@v4
-        with:
-          java-version: "25"
-          distribution: "temurin"
-          cache: maven
-
-      - name: Build and Test
-        working-directory: ./course-recommender
-        run: mvn -B clean verify
-        env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/Main
-          SPRING_DATASOURCE_USERNAME: root
-          SPRING_DATASOURCE_PASSWORD: root
-
-      - name: Upload JAR Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: course-recommender-jar
-          path: course-recommender/target/*.jar
-
-      - name: Publish Test Report
-        if: always()
-        uses: mikepenz/action-junit-report@v5
-        with:
-          report_paths: "course-recommender/target/surefire-reports/*.xml"
-
-  # ==========================================
-  # THE CD PHASE: Continuous Delivery to GitHub
-  # ==========================================
-  deploy:
-    needs: build # Won't run unless 'build' job succeeds
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write # Required to create a release and upload assets
-
-    steps:
-      - name: Download Built Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: course-recommender-jar
-          path: ./artifacts
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: Release v1.0.${{ github.run_number }}
-          body: |
-            Automated build from commit ${{ github.sha }}.
-            The compiled Spring Boot application is attached below.
-          draft: false
-          prerelease: false
-          files: ./artifacts/*.jar          distribution: "temurin"
-          cache: maven
-
-      - name: Build and Test
-        working-directory: ./course-recommender
-        run: mvn -B clean verify
-        env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/Main
-          SPRING_DATASOURCE_USERNAME: root
-          SPRING_DATASOURCE_PASSWORD: root
-
-      - name: Upload JAR Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: course-recommender-jar
-          path: course-recommender/target/*.jar
-
-      - name: Publish Test Report
-        if: always()
-        uses: mikepenz/action-junit-report@v5
-        with:
-          report_paths: "course-recommender/target/surefire-reports/*.xml"
+          files: "*.jar"
