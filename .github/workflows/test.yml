@@ -21,13 +21,13 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h localhost"
+          --health-cmd="mysqladmin ping -h localhost -proot"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=5
+          --health-retries=10
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Set up JDK 25
@@ -37,10 +37,22 @@ jobs:
           distribution: "temurin"
           cache: maven
 
-      - name: Build with Maven
+      - name: Build and Test
         working-directory: ./course-recommender
-        run: mvn -B clean package
+        run: mvn -B clean verify
         env:
           SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/Main
           SPRING_DATASOURCE_USERNAME: root
           SPRING_DATASOURCE_PASSWORD: root
+
+      - name: Upload JAR Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: course-recommender-jar
+          path: course-recommender/target/*.jar
+
+      - name: Publish Test Report
+        if: always()
+        uses: mikepenz/action-junit-report@v5
+        with:
+          report_paths: "course-recommender/target/surefire-reports/*.xml"
