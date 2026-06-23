@@ -54,13 +54,13 @@ jobs:
         with:
           name: app
           path: course-recommender/target/*.jar
+          if-no-files-found: error
 
       - name: Publish Test Report
         if: always()
         uses: mikepenz/action-junit-report@v5
         with:
           report_paths: course-recommender/target/surefire-reports/*.xml
-
 
   deploy:
     needs: build
@@ -83,8 +83,11 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: Release v1.0.${{ github.run_number }}
+          tag_name: v1.0.${{ github.run_number }}-${{ github.run_attempt }}
+          name: Release v1.0.${{ github.run_number }} (attempt ${{ github.run_attempt }})
+          generate_release_notes: true
+          make_latest: true
           body: |
             Automated build from commit ${{ github.sha }}
           files: ./artifacts/*.jar
+          
