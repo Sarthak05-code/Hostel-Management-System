@@ -36,7 +36,7 @@ Before running this project, make sure you have:
 - Java 25 or higher
 - Maven
 - MySQL Server
-- IntelliJ IDEA or VS Code
+- IntelliJ IDEA or VS Code or any IDEs you use
 
 ---
 
