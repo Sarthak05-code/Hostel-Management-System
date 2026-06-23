@@ -1,4 +1,4 @@
-name: Spring Boot CI
+name: Spring Boot CI/CD
 
 on:
   push:
@@ -11,6 +11,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      contents: read
 
     services:
       mysql:
@@ -35,6 +38,56 @@ jobs:
         with:
           java-version: "25"
           distribution: "temurin"
+          cache: maven
+
+      - name: Build and Test
+        working-directory: ./course-recommender
+        run: mvn -B clean verify
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/Main
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: root
+
+      - name: Upload JAR Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: course-recommender-jar
+          path: course-recommender/target/*.jar
+
+      - name: Publish Test Report
+        if: always()
+        uses: mikepenz/action-junit-report@v5
+        with:
+          report_paths: "course-recommender/target/surefire-reports/*.xml"
+
+  # ==========================================
+  # THE CD PHASE: Continuous Delivery to GitHub
+  # ==========================================
+  deploy:
+    needs: build # Won't run unless 'build' job succeeds
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to create a release and upload assets
+
+    steps:
+      - name: Download Built Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: course-recommender-jar
+          path: ./artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Release v1.0.${{ github.run_number }}
+          body: |
+            Automated build from commit ${{ github.sha }}.
+            The compiled Spring Boot application is attached below.
+          draft: false
+          prerelease: false
+          files: ./artifacts/*.jar          distribution: "temurin"
           cache: maven
 
       - name: Build and Test
