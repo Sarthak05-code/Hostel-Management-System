@@ -1,14 +1,13 @@
-name: Spring Boot Release
+name: Spring Boot Automated Release
 
 on:
   push:
-    tags:
-      - 'v*' # Triggers ONLY when a version tag is pushed
+    branches:
+      - main # Wakes up automatically whenever code lands on main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     permissions:
       contents: read
       checks: write
@@ -51,7 +50,7 @@ jobs:
         with:
           name: course-recommender-jar
           path: course-recommender/target/*.jar
-          retention-days: 7 # Kept short since it will be permanently attached to the release anyway
+          retention-days: 7
 
       - name: Publish Test Report
         if: always()
@@ -64,20 +63,34 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Needed to create the release and upload assets
+      contents: write # Crucial for creating tags and releases
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetches all history so the auto-tagger can see previous versions
 
+      # 1. Automatically calculate and bump the version tag (e.g., v1.0.1)
+      - name: Bump version and push tag
+        id: auto_tag
+        uses: anothrNick/github-tag-action@1.71.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          DEFAULT_BUMP: patch # Increments the last digit (1.0.0 -> 1.0.1) unless specified in commit
+
+      # 2. Download the compiled JAR
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
         with:
           name: course-recommender-jar
           path: ./release-assets
 
+      # 3. Create the Release page using the newly generated tag
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.auto_tag.outputs.new_tag }}
           files: ./release-assets/*.jar
           generate_release_notes: true
