@@ -1,9 +1,11 @@
-name: Spring Boot CI
+name: Spring Boot CI/CD
 
 on:
   push:
     branches:
       - main
+    tags:
+      - 'v*' # Triggers the workflow when a version tag is pushed (e.g., v1.0.0)
   pull_request:
     branches:
       - main
@@ -56,3 +58,30 @@ jobs:
         uses: mikepenz/action-junit-report@v5
         with:
           report_paths: "course-recommender/target/surefire-reports/*.xml"
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    # Only run this job if a tag starting with 'v' was pushed to the repository
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to create a release and upload assets
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Downloads the compiled JAR generated in the build job
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: course-recommender-jar
+          path: ./release-assets
+
+      # Automatically generates nice release notes based on commit history
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./release-assets/*.jar
+          generate_release_notes: true
