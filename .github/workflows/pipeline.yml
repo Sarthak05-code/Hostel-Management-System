@@ -1,4 +1,4 @@
-name: Spring Boot CI
+name: Spring Boot CI/CD Pipeline
 
 on:
   push:
@@ -9,9 +9,9 @@ on:
       - main
 
 jobs:
+  # JOB 1: Always runs on PRs and pushes to main
   build:
     runs-on: ubuntu-latest
-
     permissions:
       contents: read
       checks: write
@@ -54,10 +54,46 @@ jobs:
         with:
           name: course-recommender-jar
           path: course-recommender/target/*.jar
-          retention-days: 30
+          retention-days: 7
 
       - name: Publish Test Report
         if: always()
         uses: mikepenz/action-junit-report@v5
         with:
           report_paths: "course-recommender/target/surefire-reports/*.xml"
+
+  # JOB 2: Only runs on main branch pushes, AFTER the build job passes
+  release:
+    name: Create GitHub Release
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bump version and push tag
+        id: auto_tag
+        uses: anothrNick/github-tag-action@1.71.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          DEFAULT_BUMP: patch
+
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: course-recommender-jar
+          path: ./release-assets
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.auto_tag.outputs.new_tag }}
+          files: ./release-assets/*.jar
+          generate_release_notes: true
