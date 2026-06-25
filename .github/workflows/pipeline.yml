@@ -56,6 +56,7 @@ jobs:
           cache: 'maven'
 
       - name: Build and Test with Maven
+        working-directory: course-recommeder
         env:
           SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/Main
           SPRING_DATASOURCE_USERNAME: root
