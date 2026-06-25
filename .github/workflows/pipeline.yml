@@ -36,6 +36,10 @@ jobs:
   # =============================================================
   build-and-test:
     runs-on: ubuntu-latest
+
+    permissions:
+      checks: write
+      contents: read
     services:
       mysql:
         image: mysql:8.0
