@@ -55,6 +55,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - name: Build and Test with Maven
+        working-directory: course-recommender
         env:
           SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/Main
           SPRING_DATASOURCE_USERNAME: root
