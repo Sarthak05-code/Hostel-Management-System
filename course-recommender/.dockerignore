@@ -1,0 +1,12 @@
+# Ignore local build outputs
+target/
+*.jar
+
+# Ignore Git files inside the container
+.git
+.gitignore
+
+# Ignore local IDE settings
+.idea/
+*.iml
+.vscode/

@@ -69,14 +69,12 @@ jobs:
         with:
           report_paths: '**/target/surefire-reports/TEST-*.xml'
 
-      # 🔥 NEW UPGRADE 1: Pack the JAR file into a downloadable box on the screen!
       - name: Upload Compiled JAR Application
         uses: actions/upload-artifact@v4
         with:
           name: Course-Recommender-Executable-JAR
           path: course-recommender/target/*.jar
 
-      # 🔥 NEW UPGRADE 2: Generate a beautiful visual dashboard on the summary page!
       - name: Generate Summary Dashboard
         run: |
           echo "## 📊 Course Recommender Pipeline Summary" >> $GITHUB_STEP_SUMMARY
@@ -88,17 +86,41 @@ jobs:
           echo "| 🔤 Code Style Check | Passed | ![Static Badge](https://img.shields.io/badge/Linter-Clean-brightgreen) |" >> $GITHUB_STEP_SUMMARY
           echo "| 🛡️ Security Vulnerabilities | Clear | ![Static Badge](https://img.shields.io/badge/Security-Safe-success) |" >> $GITHUB_STEP_SUMMARY
           echo "| 🧪 JUnit Test Execution | Passed | ![Static Badge](https://img.shields.io/badge/Tests-100%25_Passing-blue) |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📦 Build Outputs" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ **Spring Boot JAR** successfully generated and attached to this run below." >> $GITHUB_STEP_SUMMARY
-          echo "- 🗄️ **Database Migration:** Target schema updated successfully on test MySQL container." >> $GITHUB_STEP_SUMMARY
 
   # =============================================================
-  # MERGE POINT & DEPLOYMENT STAGES (Remain exactly as before)
+  # 🔥 NEW BRANCH 4: Docker Image Packaging
+  # =============================================================
+  build-docker:
+    runs-on: ubuntu-latest
+    needs: build-and-test # 👈 Wait until tests pass before cooking the image
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./course-recommender # 👈 Points to where your Dockerfile lives
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/my-springboot-app:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/my-springboot-app:${{ github.sha }}
+
+  # =============================================================
+  # MERGE POINT & DEPLOYMENT STAGES
   # =============================================================
   create-release:
     runs-on: ubuntu-latest
-    needs: [lint-code, security-scan, build-and-test]
+    needs: [lint-code, security-scan, build-docker] # 👈 Now waits on Docker to finish too
     steps:
       - name: Process Release
         run: echo "Automating GitHub Release generation..."
